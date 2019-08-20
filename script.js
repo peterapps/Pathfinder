@@ -108,10 +108,22 @@ function traverse(){
 	came_from = {};
 	came_from[start] = ' ';
 
-	while (!frontier.empty()){
-		var current = frontier.get();
+	var loop = setInterval(function(){
+		if (frontier.empty()){
+			clearInterval(loop);
+			drawRoute();
+			return;
+		}
 
-		if (current.equals(end)) break;
+		var current = frontier.get();
+		ctx.fillStyle = "rgba(255,255,255,0.2)";
+		ctx.fillRect(current.x, current.y, 1, 1);
+
+		if (current.equals(end)){
+			clearInterval(loop);
+			drawRoute();
+			return;
+		};
 
 		var neighbors = graph.neighbors(current);
 		for (var i = 0; i < neighbors.length; i++){
@@ -121,9 +133,7 @@ function traverse(){
 				came_from[next] = current;
 			}
 		}
-	}
-
-	drawRoute();
+	}, speed);
 }
 
 function drawRoute(){
