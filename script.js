@@ -1,6 +1,6 @@
 // https://www.redblobgames.com/pathfinding/a-star/introduction.html
 
-var canvas, ctx, matrix, visited, came_from, start, end;
+var canvas, ctx, matrix, graph, came_from;
 
 var speed = 20;
 
@@ -23,7 +23,7 @@ function message(txt){
 	document.getElementById("msg").innerHTML = txt;
 }
 
-function blank_map(val){
+function blank_map(val = 0){
 	var arr = [];
 	for (var i = 0; i < canvas.height; i++){
 		var row = [];
@@ -74,7 +74,7 @@ function getCursor(event){
 	var rect = canvas.getBoundingClientRect();
 	var x = (event.clientX - rect.left) * canvas.width / canvas.offsetWidth;
 	var y = (event.clientY - rect.top) * canvas.height / canvas.offsetHeight;
-	return {"x": Math.round(x), "y": Math.round(y)};
+	return new Point(Math.round(x), Math.round(y));
 }
 
 function handleStart(event){
@@ -94,64 +94,48 @@ function handleEnd(event){
 	ctx.fillRect(end.x, end.y, 1, 1);
 	message("Calculating");
 	console.log("End: (" + end.x + ", " + end.y + ")");
-	checkEverywhere();
-	message("Drawing route");
+
+	traverse();
+}
+
+// https://www.redblobgames.com/pathfinding/a-star/implementation.html
+
+function traverse(){
+	graph = new SquareGrid(matrix);
+
+	var frontier = new Queue();
+	frontier.put(start);
+	came_from = {};
+	came_from[start] = ' ';
+
+	while (!frontier.empty()){
+		var current = frontier.get();
+
+		if (current.equals(end)) break;
+
+		var neighbors = graph.neighbors(current);
+		for (var i = 0; i < neighbors.length; i++){
+			var next = neighbors[i];
+			if (!(next in came_from)){
+				frontier.put(next);
+				came_from[next] = current;
+			}
+		}
+	}
+
 	drawRoute();
-}
-
-function checkEverywhere(){
-	visited = blank_map(0);
-	came_from = blank_map([0,0]);
-	// Recursively visit each neighbor
-	checkNeighbors(start.x, start.y, [0, 0]);
-}
-
-var RIGHT = [1, 0];
-var LEFT = [-1, 0];
-var UP = [0, -1];
-var DOWN = [0, 1];
-
-function isValid(c, r){
-	return r >= 0 && r < matrix.length && c >= 0 && c < matrix[0].length;
-}
-
-function checkNeighbors(c, r, dir){
-	if (!isValid(c, r)) return; // Out of bounds
-	if (matrix[r][c] === 0) return; // Not road
-	if (visited[r][c] > 0) return; // Already visited
-	console.log("Checking: (" + c + ", " + r + ")");
-	visited[r][c] += 1;
-	ctx.fillStyle = "rgba(255,255,255,0.2)";
-	ctx.fillRect(c, r, 1, 1);
-	came_from[r][c] = dir;
-	if (c == end.x && r == end.y) return; // Done searching
-	checkNeighbors(c, r + 1, UP);
-	checkNeighbors(c, r - 1, DOWN);
-	checkNeighbors(c - 1, r, RIGHT);
-	checkNeighbors(c + 1, r, LEFT);
 }
 
 function drawRoute(){
 	ctx.strokeStyle = "red";
-	var x = end.x;
-	var y = end.y;
-	console.log("Calcuating route");
-	console.log(came_from);
-	var shift = 1;
+	var pt = new Point(end.x, end.y);
 	var i = setInterval(function(){
-		ctx.strokeStyle = "rgb(" + (255 * shift) + ",0," + (128 * (1 - shift)) + ")";
-		shift *= 0.993;
-		if (shift < 0) shift = 1;
 		ctx.beginPath();
-		ctx.moveTo(x, y);
-		dir = came_from[y][x];
-		console.log(dir);
-		console.log("From (" + x + ", " + y + ") to (" + (x + dir[0]) + ", " + (y + dir[1]) + ")");
-		x += dir[0];
-		y += dir[1];
-		ctx.lineTo(x, y);
+		ctx.moveTo(pt.x, pt.y);
+		pt = came_from[pt];
+		ctx.lineTo(pt.x, pt.y);
 		ctx.stroke();
-		if ((x == start.x && y == end.y) || (dir[0] == 0 && dir[1] == 0)){
+		if (pt.equals(start)){
 			console.log("Done");
 			clearInterval(i);
 		}
