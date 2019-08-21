@@ -47,8 +47,8 @@ function handleSpeed(){
 }
 
 function message(txt){
-	document.getElementById("msg").innerHTML = txt;
-	console.log(txt);
+	if (txt) document.getElementById("log").innerHTML += txt;
+	else document.getElementById("log").innerHTML = "";
 }
 
 function blank_map(val = 0){
@@ -89,7 +89,8 @@ function handleFile(event){
 			matrix[row][col] = val / 255;
 		}
 		// Next step
-		message("Click on a starting point in the gray");
+		message();
+		message("<li>Click on a starting point</li>");
 		canvas.addEventListener("click", handleStart, false);
 	}, false);
 	if (event) img.src = URL.createObjectURL(event.target.files[0]);
@@ -108,8 +109,8 @@ function handleStart(event){
 	canvas.removeEventListener("click", handleStart, false);
 	ctx.fillStyle = "blue";
 	ctx.fillRect(start.x, start.y, 1, 1);
-	console.log("Start: (" + start.x + ", " + start.y + ")");
-	message("Click on an ending point");
+	message();
+	message("<li>Click on an ending point</li>");
 	canvas.addEventListener("click", handleEnd, false);
 }
 
@@ -118,9 +119,8 @@ function handleEnd(event){
 	canvas.removeEventListener("click", handleEnd, false);
 	ctx.fillStyle = "blue";
 	ctx.fillRect(end.x, end.y, 1, 1);
-	console.log("End: (" + end.x + ", " + end.y + ")");
-
 	startTime = new Date();
+	message();
 	traverseBreadth();
 }
 
@@ -129,7 +129,7 @@ function handleEnd(event){
 // First Breadth Search
 function traverseBreadth(){
 	var skip = !document.getElementById("breadth").checked;
-	if (!skip) message("Calculating using First Breadth Search");
+	if (!skip) message("<li>Calculating using <span class='b'>First Breadth Search</span></li>");
 	color = "red";
 	graph = new SquareGrid(matrix);
 
@@ -170,7 +170,7 @@ function traverseBreadth(){
 // Dijkstra Search
 function traverseDijkstra(){
 	var skip = !document.getElementById("dijkstra").checked;
-	if (!skip) message("Calculating using Dijkstra search");
+	if (!skip) message("<li>Calculating using <span class='d'>Dijkstra search</span></li>");
 	color = "blue";
 	graph = new WeightedGrid(matrix);
 
@@ -214,14 +214,14 @@ function traverseDijkstra(){
 }
 
 // A star Search
-function heuristic(a, b){
+function heuristic(a, b){ // https://www.redblobgames.com/pathfinding/grids/algorithms.html
 	return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
 function traverseAStar(){
 	var skip = !document.getElementById("astar").checked;
-	if (!skip) message("Calculating using A* search");
-	color = "yellow";
+	if (!skip) message("<li>Calculating using <span class='a'>A* search</span></li>");
+	color = "green";
 	graph = new WeightedGrid(matrix);
 
 	var frontier = new PriorityQueue();
@@ -269,7 +269,7 @@ function drawRoute(color = "red", skip = false, callback){
 		callback();
 		return;
 	}
-	message("Drawing route");
+	message("<ul><li>Drawing route</li></ul>");
 	ctx.globalAlpha = 1;
 	ctx.strokeStyle = color;
 	var travelTime = 0;
@@ -282,13 +282,14 @@ function drawRoute(color = "red", skip = false, callback){
 		travelTime += 1.0 / this.matrix[pt.y][pt.x];
 		ctx.stroke();
 		if (pt.equals(start)){
-			console.log("Done");
 			clearInterval(i);
 			endTime = new Date();
 			var elapsed = (endTime - startTime) / 1000;
-			console.log("Route traversed and calculated in " + elapsed.toFixed(2) + " seconds");
-			console.log("Estimated travel time: " + travelTime.toFixed(2) + " units")
+
+			message("<ul><li>Route traversed and calculated in " + elapsed.toFixed(2) + " seconds</li>" +
+				"<li>Estimated travel time: " + travelTime.toFixed(2) + " units</li></ul>");
 			if (callback) callback();
+			else message("<li>Done</li>");
 		}
 	}, speed);
 }

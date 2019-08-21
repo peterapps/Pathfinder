@@ -8,7 +8,7 @@ body {
 canvas {
 	background: white;
 	border: 1px solid white;
-	min-width: 800px;
+	min-width: 700px;
 	image-rendering: optimizeSpeed;             /* Older versions of FF          */
 	image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
 	image-rendering: -webkit-optimize-contrast; /* Safari                        */
@@ -26,4 +26,31 @@ table, td {
 
 table {
 	position: absolute;
+}
+
+.b {
+	color: #ffcccd;
+}
+
+.d {
+	color: #ccccff;
+}
+
+.a {
+	color: #cde6cc;
+}
+
+#algos {
+	list-style-type: none;
+}
+
+#algos li {
+	display: inline;
+	border: 1px solid white;
+	border-radius: 10px;
+	padding: 10px;
+}
+
+hr {
+	margin-top: 25px;
 }

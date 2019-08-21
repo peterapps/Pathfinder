@@ -12,12 +12,8 @@
 			<tr>
 				<td>
 					<h1>Pathfinder</h1>
-					<p id="msg">
-						Choose a file.
-					</p>
-					<input type="file" accept="image/*" id="chooser" />
 					<hr/>
-					<h3>Options</h3>
+					<input type="file" accept="image/*" id="chooser" />
 					<p>
 						Speed:
 						<select id="speed">
@@ -27,12 +23,16 @@
 					</p>
 					<p>
 						Algorithms:
-						<ul style="list-style-type: none">
-							<li><input type="checkbox" id="breadth" checked /> First Breadth</li>
-							<li><input type="checkbox" id="dijkstra" checked /> Dijkstra</li>
-							<li><input type="checkbox" id="astar" checked /> A*</li>
+						<ul id="algos">
+							<li class="b"><input type="checkbox" id="breadth" checked /> First Breadth</li>
+							<li class="d"><input type="checkbox" id="dijkstra" checked /> Dijkstra</li>
+							<li class="a"><input type="checkbox" id="astar" checked /> A*</li>
 						</ul>
 					</p>
+					<hr/>
+					<ul id="log">
+						<li>Choose a file.</li>
+					</ul>
 				</td>
 				<td id="container"></td>
 			</tr>
