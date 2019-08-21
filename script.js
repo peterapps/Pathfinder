@@ -1,8 +1,25 @@
 // https://www.redblobgames.com/pathfinding/a-star/introduction.html
 
-var canvas, ctx, matrix, graph, came_from;
+var canvas, ctx, matrix, graph, came_from, start, end;
+var startTime, endTime;
 
 var speed = 1;
+
+// Customized to be immediate
+window.oldSI = window.setInterval;
+window.oldCI = window.clearInterval;
+var looping = false;
+window.setInterval = function(f, i){
+	if (i > 0) return window.oldSI(f, i);
+	looping = true;
+	while (looping){
+		f();
+	}
+}
+window.clearInterval = function(i){
+	window.oldCI(i);
+	looping = false;
+}
 
 window.addEventListener("load", function(){
 	// Generate canvas
@@ -14,6 +31,9 @@ window.addEventListener("load", function(){
 	ctx = canvas.getContext("2d");
 	ctx.imageSmoothingEnabled = false;
 
+	document.getElementById("speed").addEventListener("change", handleSpeed, false);
+	handleSpeed();
+
 	document.getElementById("chooser").addEventListener("change", handleFile, false);
 	if (location.hash.length > 1){
 		document.getElementById("chooser").style.display = "none";
@@ -22,8 +42,13 @@ window.addEventListener("load", function(){
 
 }, false);
 
+function handleSpeed(){
+	speed = parseInt(document.getElementById("speed").value);
+}
+
 function message(txt){
 	document.getElementById("msg").innerHTML = txt;
+	console.log(txt);
 }
 
 function blank_map(val = 0){
@@ -52,18 +77,16 @@ function handleFile(event){
 		matrix = blank_map(0);
 		for (var i = 0; i < data.data.length; i += 4){
 			// Figure out value
-			var gray = "128, 128, 128"; // Gray is (128, 128, 128)
-			var green = "32, 192, 64"; // Green is (32, 192, 64)
 			var r = data.data[i];
 			var g = data.data[i + 1];
 			var b = data.data[i + 2];
 			var a = data.data[i + 3];
-			var color = [r, g, b].join(", ");
+			var val = (r + g + b) / 3; // Brightness
 			// Find coordinates on map
 			var pixel_num = i / 4;
 			var row = Math.floor(pixel_num / width);
 			var col = pixel_num % width;
-			matrix[row][col] = (color == gray) ? 1 : 0;
+			matrix[row][col] = val / 255;
 		}
 		// Next step
 		message("Click on a starting point in the gray");
@@ -97,6 +120,7 @@ function handleEnd(event){
 	ctx.fillRect(end.x, end.y, 1, 1);
 	console.log("End: (" + end.x + ", " + end.y + ")");
 
+	startTime = new Date();
 	traverseBreadth();
 }
 
@@ -145,16 +169,22 @@ function traverseBreadth(){
 function drawRoute(color = "red", callback){
 	ctx.globalAlpha = 1;
 	ctx.strokeStyle = color;
+	var travelTime = 0;
 	var pt = new Point(end.x, end.y);
 	var i = setInterval(function(){
 		ctx.beginPath();
 		ctx.moveTo(pt.x, pt.y);
 		pt = came_from[pt];
 		ctx.lineTo(pt.x, pt.y);
+		travelTime += 1.0 / this.matrix[pt.y][pt.x];
 		ctx.stroke();
 		if (pt.equals(start)){
 			console.log("Done");
 			clearInterval(i);
+			endTime = new Date();
+			var elapsed = (endTime - startTime) / 1000;
+			console.log("Route traversed and calculated in " + elapsed.toFixed(2) + " seconds");
+			console.log("Estimated travel time: " + travelTime.toFixed(2) + " units")
 			if (callback) callback();
 		}
 	}, speed);

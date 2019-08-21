@@ -52,7 +52,7 @@ class SquareGrid {
 		var options = [new Point(x - 1, y), new Point(x + 1, y), new Point(x, y - 1), new Point(x, y + 1)];
 		for (var i = 0; i < options.length; i++){
 			var pt = options[i];
-			if (this.inBounds(pt) && this.matrix[pt.y][pt.x] == 1) results.push(pt);
+			if (this.inBounds(pt) && this.matrix[pt.y][pt.x] > 0) results.push(pt);
 		}
 		return results;
 	}
@@ -65,8 +65,9 @@ class WeightedGrid extends SquareGrid {
 	}
 
 	cost(from, to){
-		if (to.y < 12) return 15;
-		return (to in this.weights) ? this.weights[to] : 1;
+		if (!(to in this.weights)) this.weights[to] = 1.0 / this.matrix[to.y][to.x];
+		return this.weights[to];
+		// return (to in this.weights) ? this.weights[to] : 1;
 	}
 }
 
