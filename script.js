@@ -2,7 +2,7 @@
 
 var canvas, ctx, matrix, graph, came_from;
 
-var speed = 20;
+var speed = 1;
 
 window.addEventListener("load", function(){
 	// Generate canvas
@@ -15,7 +15,10 @@ window.addEventListener("load", function(){
 	ctx.imageSmoothingEnabled = false;
 
 	document.getElementById("chooser").addEventListener("change", handleFile, false);
-	if (location.hash.length > 1) handleFile(false);
+	if (location.hash.length > 1){
+		document.getElementById("chooser").style.display = "none";
+		handleFile(false);
+	}
 
 }, false);
 
@@ -92,15 +95,17 @@ function handleEnd(event){
 	canvas.removeEventListener("click", handleEnd, false);
 	ctx.fillStyle = "blue";
 	ctx.fillRect(end.x, end.y, 1, 1);
-	message("Calculating");
 	console.log("End: (" + end.x + ", " + end.y + ")");
 
-	traverse();
+	traverseBreadth();
 }
 
 // https://www.redblobgames.com/pathfinding/a-star/implementation.html
 
-function traverse(){
+// First Breadth Search
+function traverseBreadth(){
+	message("Calculating using First Breadth Search");
+	color = "red";
 	graph = new SquareGrid(matrix);
 
 	var frontier = new Queue();
@@ -111,17 +116,18 @@ function traverse(){
 	var loop = setInterval(function(){
 		if (frontier.empty()){
 			clearInterval(loop);
-			drawRoute();
+			drawRoute(color, traverseDijkstra);
 			return;
 		}
 
 		var current = frontier.get();
-		ctx.fillStyle = "rgba(255,255,255,0.2)";
+		ctx.fillStyle = color;
+		ctx.globalAlpha = 0.2;
 		ctx.fillRect(current.x, current.y, 1, 1);
 
 		if (current.equals(end)){
 			clearInterval(loop);
-			drawRoute();
+			drawRoute("red", traverseDijkstra);
 			return;
 		};
 
@@ -136,8 +142,9 @@ function traverse(){
 	}, speed);
 }
 
-function drawRoute(){
-	ctx.strokeStyle = "red";
+function drawRoute(color = "red", callback){
+	ctx.globalAlpha = 1;
+	ctx.strokeStyle = color;
 	var pt = new Point(end.x, end.y);
 	var i = setInterval(function(){
 		ctx.beginPath();
@@ -148,6 +155,101 @@ function drawRoute(){
 		if (pt.equals(start)){
 			console.log("Done");
 			clearInterval(i);
+			if (callback) callback();
+		}
+	}, speed);
+}
+
+// Dijkstra Search
+function traverseDijkstra(){
+	message("Calculated using Dijkstra search");
+	color = "blue";
+	graph = new WeightedGrid(matrix);
+
+	var frontier = new PriorityQueue();
+	frontier.put(start, 0);
+	came_from = {};
+	var cost_so_far = {};
+	came_from[start] = ' ';
+	cost_so_far[start] = 0;
+
+	var loop = setInterval(function(){
+		if (frontier.empty()){
+			clearInterval(loop);
+			drawRoute(color, traverseAStar);
+			return;
+		}
+
+		var current = frontier.get();
+		ctx.fillStyle = color;
+		ctx.globalAlpha = 0.2;
+		ctx.fillRect(current.x, current.y, 1, 1);
+
+		if (current.equals(end)){
+			clearInterval(loop);
+			drawRoute(color, traverseAStar);
+			return;
+		};
+
+		var neighbors = graph.neighbors(current);
+		for (var i = 0; i < neighbors.length; i++){
+			var next = neighbors[i];
+			var new_cost = cost_so_far[current] + graph.cost(current, next);
+			if (!(next in came_from) || new_cost < cost_so_far[next]){
+				cost_so_far[next] = new_cost;
+				priority = new_cost;
+				frontier.put(next, priority);
+				came_from[next] = current;
+			}
+		}
+	}, speed);
+}
+
+// A star Search
+function heuristic(a, b){
+	return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+}
+
+function traverseAStar(){
+	message("Calculated using A Star search");
+	color = "yellow";
+	graph = new WeightedGrid(matrix);
+
+	var frontier = new PriorityQueue();
+	frontier.put(start, 0);
+	came_from = {};
+	var cost_so_far = {};
+	came_from[start] = ' ';
+	cost_so_far[start] = 0;
+
+	var loop = setInterval(function(){
+		if (frontier.empty()){
+			clearInterval(loop);
+			drawRoute(color);
+			return;
+		}
+
+		var current = frontier.get();
+		ctx.fillStyle = color;
+		ctx.globalAlpha = 0.2;
+		ctx.fillRect(current.x, current.y, 1, 1);
+
+		if (current.equals(end)){
+			clearInterval(loop);
+			drawRoute(color);
+			return;
+		};
+
+		var neighbors = graph.neighbors(current);
+		for (var i = 0; i < neighbors.length; i++){
+			var next = neighbors[i];
+			var new_cost = cost_so_far[current] + graph.cost(current, next);
+			if (!(next in came_from) || new_cost < cost_so_far[next]){
+				cost_so_far[next] = new_cost;
+				priority = new_cost + heuristic(end, next);
+				frontier.put(next, priority);
+				came_from[next] = current;
+			}
 		}
 	}, speed);
 }

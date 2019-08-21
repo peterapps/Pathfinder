@@ -58,6 +58,18 @@ class SquareGrid {
 	}
 }
 
+class WeightedGrid extends SquareGrid {
+	constructor(matrix){
+		super(matrix);
+		this.weights = {};
+	}
+
+	cost(from, to){
+		if (to.y < 12) return 15;
+		return (to in this.weights) ? this.weights[to] : 1;
+	}
+}
+
 // https://www.redblobgames.com/pathfinding/a-star/implementation.html
 
 class Queue {
@@ -75,5 +87,36 @@ class Queue {
 
 	get(){
 		return this.elements.shift();
+	}
+}
+
+class QElement {
+	constructor(item, priority){
+		this.item = item;
+		this.priority = priority;
+	}
+}
+
+class PriorityQueue extends Queue {
+	constructor(){
+		super();
+	}
+
+	put(item, priority){
+		var q = new QElement(item, priority);
+		var contain = false;
+		// This can be optimized by using a heap
+		for (var i = 0; i < this.elements.length; i++){
+			if (this.elements[i].priority > q.priority){
+				this.elements.splice(i, 0, q);
+				contain = true;
+				break;
+			}
+		}
+		if (!contain) this.elements.push(q);
+	}
+
+	get(){
+		return this.elements.shift().item;
 	}
 }
