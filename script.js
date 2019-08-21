@@ -269,10 +269,10 @@ function drawRoute(color = "red", skip = false, callback){
 		callback();
 		return;
 	}
-	message("<ul><li>Drawing route</li></ul>");
 	ctx.globalAlpha = 1;
 	ctx.strokeStyle = color;
 	var travelTime = 0;
+	var dist = 0;
 	var pt = new Point(end.x, end.y);
 	var i = setInterval(function(){
 		ctx.beginPath();
@@ -280,14 +280,18 @@ function drawRoute(color = "red", skip = false, callback){
 		pt = came_from[pt];
 		ctx.lineTo(pt.x, pt.y);
 		travelTime += 1.0 / this.matrix[pt.y][pt.x];
+		dist += 1;
 		ctx.stroke();
 		if (pt.equals(start)){
 			clearInterval(i);
 			endTime = new Date();
 			var elapsed = (endTime - startTime) / 1000;
 
-			message("<ul><li>Route traversed and calculated in " + elapsed.toFixed(2) + " seconds</li>" +
-				"<li>Estimated travel time: " + travelTime.toFixed(2) + " units</li></ul>");
+			message(
+				"<ul><li>Calculation: " + elapsed.toFixed(3) + " seconds</li>" +
+				"<li>Travel time: " + travelTime.toFixed(0) + " time units</li>" +
+				"<li>Distance: " + dist + " distance units</li></ul>"
+			);
 			if (callback) callback();
 			else message("<li>Done</li>");
 		}
