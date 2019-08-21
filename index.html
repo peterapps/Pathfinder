@@ -7,19 +7,36 @@
 	<script type="text/javascript" src="./script.js"></script>
 </head>
 <body>
-	<div id="menu">
-		<h1>Pathfinder</h1>
-		<input type="file" accept="image/*" id="chooser" />
-		<p>
-			Speed:
-			<select id="speed">
-				<option value="1">Slow</option>
-				<option value="0">Fast</option>
-			</select>
-		</p>
-		<p id="msg">
-			Choose a file.
-		</p>
-	</div>
+	<table>
+		<tbody>
+			<tr>
+				<td>
+					<h1>Pathfinder</h1>
+					<p id="msg">
+						Choose a file.
+					</p>
+					<input type="file" accept="image/*" id="chooser" />
+					<hr/>
+					<h3>Options</h3>
+					<p>
+						Speed:
+						<select id="speed">
+							<option value="1">Slow</option>
+							<option value="0">Fast</option>
+						</select>
+					</p>
+					<p>
+						Algorithms:
+						<ul style="list-style-type: none">
+							<li><input type="checkbox" id="breadth" checked /> First Breadth</li>
+							<li><input type="checkbox" id="dijkstra" checked /> Dijkstra</li>
+							<li><input type="checkbox" id="astar" checked /> A*</li>
+						</ul>
+					</p>
+				</td>
+				<td id="container"></td>
+			</tr>
+		</tbody>
+	</table>
 </body>
 </html>

@@ -26,7 +26,7 @@ window.addEventListener("load", function(){
 	canvas = document.createElement("canvas");
 	canvas.width = 5;
 	canvas.height = 1;
-	document.body.appendChild(canvas);
+	document.getElementById("container").appendChild(canvas);
 
 	ctx = canvas.getContext("2d");
 	ctx.imageSmoothingEnabled = false;
@@ -128,7 +128,8 @@ function handleEnd(event){
 
 // First Breadth Search
 function traverseBreadth(){
-	message("Calculating using First Breadth Search");
+	var skip = !document.getElementById("breadth").checked;
+	if (!skip) message("Calculating using First Breadth Search");
 	color = "red";
 	graph = new SquareGrid(matrix);
 
@@ -138,9 +139,9 @@ function traverseBreadth(){
 	came_from[start] = ' ';
 
 	var loop = setInterval(function(){
-		if (frontier.empty()){
+		if (frontier.empty() || skip){
 			clearInterval(loop);
-			drawRoute(color, traverseDijkstra);
+			drawRoute(color, skip, traverseDijkstra);
 			return;
 		}
 
@@ -151,7 +152,7 @@ function traverseBreadth(){
 
 		if (current.equals(end)){
 			clearInterval(loop);
-			drawRoute("red", traverseDijkstra);
+			drawRoute(color, skip, traverseDijkstra);
 			return;
 		};
 
@@ -166,33 +167,10 @@ function traverseBreadth(){
 	}, speed);
 }
 
-function drawRoute(color = "red", callback){
-	ctx.globalAlpha = 1;
-	ctx.strokeStyle = color;
-	var travelTime = 0;
-	var pt = new Point(end.x, end.y);
-	var i = setInterval(function(){
-		ctx.beginPath();
-		ctx.moveTo(pt.x, pt.y);
-		pt = came_from[pt];
-		ctx.lineTo(pt.x, pt.y);
-		travelTime += 1.0 / this.matrix[pt.y][pt.x];
-		ctx.stroke();
-		if (pt.equals(start)){
-			console.log("Done");
-			clearInterval(i);
-			endTime = new Date();
-			var elapsed = (endTime - startTime) / 1000;
-			console.log("Route traversed and calculated in " + elapsed.toFixed(2) + " seconds");
-			console.log("Estimated travel time: " + travelTime.toFixed(2) + " units")
-			if (callback) callback();
-		}
-	}, speed);
-}
-
 // Dijkstra Search
 function traverseDijkstra(){
-	message("Calculated using Dijkstra search");
+	var skip = !document.getElementById("dijkstra").checked;
+	if (!skip) message("Calculating using Dijkstra search");
 	color = "blue";
 	graph = new WeightedGrid(matrix);
 
@@ -204,9 +182,9 @@ function traverseDijkstra(){
 	cost_so_far[start] = 0;
 
 	var loop = setInterval(function(){
-		if (frontier.empty()){
+		if (frontier.empty() || skip){
 			clearInterval(loop);
-			drawRoute(color, traverseAStar);
+			drawRoute(color, skip, traverseAStar);
 			return;
 		}
 
@@ -217,7 +195,7 @@ function traverseDijkstra(){
 
 		if (current.equals(end)){
 			clearInterval(loop);
-			drawRoute(color, traverseAStar);
+			drawRoute(color, skip, traverseAStar);
 			return;
 		};
 
@@ -241,7 +219,8 @@ function heuristic(a, b){
 }
 
 function traverseAStar(){
-	message("Calculated using A Star search");
+	var skip = !document.getElementById("astar").checked;
+	if (!skip) message("Calculating using A* search");
 	color = "yellow";
 	graph = new WeightedGrid(matrix);
 
@@ -253,9 +232,9 @@ function traverseAStar(){
 	cost_so_far[start] = 0;
 
 	var loop = setInterval(function(){
-		if (frontier.empty()){
+		if (frontier.empty() || skip){
 			clearInterval(loop);
-			drawRoute(color);
+			drawRoute(color, skip);
 			return;
 		}
 
@@ -266,7 +245,7 @@ function traverseAStar(){
 
 		if (current.equals(end)){
 			clearInterval(loop);
-			drawRoute(color);
+			drawRoute(color, skip);
 			return;
 		};
 
@@ -280,6 +259,36 @@ function traverseAStar(){
 				frontier.put(next, priority);
 				came_from[next] = current;
 			}
+		}
+	}, speed);
+}
+
+// Draw route
+function drawRoute(color = "red", skip = false, callback){
+	if (skip){
+		callback();
+		return;
+	}
+	message("Drawing route");
+	ctx.globalAlpha = 1;
+	ctx.strokeStyle = color;
+	var travelTime = 0;
+	var pt = new Point(end.x, end.y);
+	var i = setInterval(function(){
+		ctx.beginPath();
+		ctx.moveTo(pt.x, pt.y);
+		pt = came_from[pt];
+		ctx.lineTo(pt.x, pt.y);
+		travelTime += 1.0 / this.matrix[pt.y][pt.x];
+		ctx.stroke();
+		if (pt.equals(start)){
+			console.log("Done");
+			clearInterval(i);
+			endTime = new Date();
+			var elapsed = (endTime - startTime) / 1000;
+			console.log("Route traversed and calculated in " + elapsed.toFixed(2) + " seconds");
+			console.log("Estimated travel time: " + travelTime.toFixed(2) + " units")
+			if (callback) callback();
 		}
 	}, speed);
 }

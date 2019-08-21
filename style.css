@@ -2,19 +2,28 @@ body {
 	background: black;
 	color: white;
 	font-family: "Comic Sans MS", sans-serif;
+	margin: 0;
 }
 
 canvas {
 	background: white;
 	border: 1px solid white;
-	position: absolute;
-	left: 0;
-	bottom: 0;
-	min-width: 700px;
+	min-width: 800px;
 	image-rendering: optimizeSpeed;             /* Older versions of FF          */
 	image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
 	image-rendering: -webkit-optimize-contrast; /* Safari                        */
 	image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
 	image-rendering: pixelated;                 /* Awesome future-browsers       */
 	-ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+}
+
+table, td {
+	width: 100%;
+	height: 100%;
+	vertical-align: top;
+	padding: 5px;
+}
+
+table {
+	position: absolute;
 }
